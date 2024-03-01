@@ -19,5 +19,13 @@ jobs:
       - name: Login to ArgoCD Server
         run: argocd login --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --server ${{ secrets.ARGOCD_SERVER }} --insecure
 
+      - name: Port Forwarding to ArgoCD Server
+        run: kubectl port-forward svc/argocd-server -n argocd 8080:443 &
+        continue-on-error: true
+
+      - name: Terminate Port Forwarding
+        run: kill $(jobs -p)
+        if: always() # This step runs even if previous steps fail
+
       - name: Create ArgoCD Application
         run: argocd app create webapp-kustom-prod --repo https://github.com/KushNeupane/argo-examples.git --path kustom-webapp/overlays/prod --dest-server https://kubernetes.default.svc --dest-namespace prod
