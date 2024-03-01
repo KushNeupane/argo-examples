@@ -3,6 +3,8 @@ name: Sample Kutomize App Deployment
 on:
   push:
     branches: [ "master" ] 
+
+workflow_dispatch:
     
 jobs:
   build:
@@ -23,8 +25,10 @@ jobs:
         continue-on-error: true
 
       - name: Terminate Port Forwarding
-        run: kill $(jobs -p)
+        run: pkill kubectl || true
         if: always() # This step runs even if previous steps fail
 
       - name: Create ArgoCD Application
-        run: argocd app create webapp-kustom-prod --repo https://github.com/KushNeupane/argo-examples.git --path kustom-webapp/overlays/prod --dest-server https://kubernetes.default.svc --dest-namespace prod
+        run: |
+          argocd app create webapp-kustom-prod --repo https://github.com/KushNeupane/argo-examples.git --path kustom-webapp/overlays/prod --dest-server https://kubernetes.default.svc --dest-namespace prod
+      continue-on-error: true
